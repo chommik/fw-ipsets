@@ -1,5 +1,6 @@
+# SPDX-License-Identifier: BSD-2-Clause
+
 import argparse
-import json
 import logging
 import os
 import subprocess
@@ -7,7 +8,6 @@ import sys
 
 import toml
 from rich.logging import RichHandler
-from rich.pretty import pprint
 
 from fw_ipsets.config import Config, IPSetDefinition, IPSetType
 from fw_ipsets.handler import IPAddressHandler, IPNetHandler

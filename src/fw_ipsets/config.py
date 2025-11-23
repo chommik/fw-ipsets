@@ -1,3 +1,5 @@
+# SPDX-License-Identifier: BSD-2-Clause
+
 from enum import Enum
 from pathlib import Path
 from typing import List

@@ -1,10 +1,11 @@
+# SPDX-License-Identifier: BSD-2-Clause
+
 import json
 import subprocess
 import tempfile
 from abc import ABC, abstractmethod
-from typing import Type
 
-from netaddr.ip import IPAddress, IPNetwork, BaseIP, cidr_merge
+from netaddr.ip import IPAddress, IPNetwork, cidr_merge
 
 
 class IPSetHandler(ABC):
