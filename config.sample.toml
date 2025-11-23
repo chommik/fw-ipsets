@@ -1,0 +1,21 @@
+###
+### Sample configuration file for fw-ipsets
+###
+
+## Temporary suffix for kernel ipsets
+temp-suffix = "-tmp"
+
+
+### Set definitions
+[[ipsets]]
+# Kernel name
+name = "changeme"
+
+# Type: net (for netmasks) or ip (for IP addresses)
+type = "net"
+
+# Source file path
+source = "/some/path"
+
+# Options for 'ipset create'
+kernel-opts = ["maxelem", "1048576"]
