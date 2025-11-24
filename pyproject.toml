@@ -1,6 +1,6 @@
 [project]
 name = "fw-ipsets"
-version = "0.1.0"
+version = "0.2.0"
 description = "Apply text-based ipset list to Linux kernel"
 authors = [
     { name = "Rafal Macyszyn" }

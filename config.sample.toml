@@ -8,6 +8,9 @@ temp-suffix = "-tmp"
 
 ### Set definitions
 [[ipsets]]
+# Backend: nft or ipset
+backend = "ipset"
+
 # Kernel name
 name = "changeme"
 
@@ -19,3 +22,23 @@ source = "/some/path"
 
 # Options for 'ipset create'
 kernel-opts = ["maxelem", "1048576"]
+
+
+[[ipsets]]
+# Backend: nft or ipset
+backend = "nft"
+
+# IP family to use
+family = "ip"
+
+# NFT table to use
+table = "filter"
+
+# Kernel name
+name = "changeme"
+
+# Type: net (for netmasks) or ip (for IP addresses)
+type = "net"
+
+# Options for 'nft add set'
+kernel-opts = ["size 1048576;"]
