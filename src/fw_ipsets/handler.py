@@ -14,11 +14,6 @@ from fw_ipsets.config import NFTSetDefinition, IPSetType
 class IPSetHandler(ABC):
     @staticmethod
     @abstractmethod
-    def set_type() -> type:
-        pass
-
-    @staticmethod
-    @abstractmethod
     def kernel_ipset_type() -> str:
         pass
 
@@ -30,20 +25,25 @@ class IPSetHandler(ABC):
     @classmethod
     def read_from_file(cls, file_name: str | PathLike) -> set[IPAddress | IPNetwork]:
         ipset = set()
-        elem_type = cls.set_type()
         with open(file_name, 'r') as infile:
             for line in infile:
                 if line.startswith('#'):
                     continue
-                ipset.add(elem_type(line.strip()))
+                if '/' in line:
+                    ipset.add(IPNetwork(line.strip()))
+                else:
+                    ipset.add(IPAddress(line.strip()))
         return ipset
 
     @classmethod
     def read_from_kernel_ipset(cls, ipset_name: str, ipset_opts: list[str]) -> set[IPAddress | IPNetwork]:
         ipset = set()
-        elem_type = cls.set_type()
         for item in json.loads(subprocess.check_output(['ipset', '-o', 'json', 'list', ipset_name]))[0]['members']:
-            ipset.add(elem_type(item['elem']))
+            elem = item['elem']
+            if '/' in elem:
+                ipset.add(IPNetwork(elem))
+            else:
+                ipset.add(IPAddress(elem))
         return ipset
 
     @classmethod
@@ -105,8 +105,10 @@ class IPSetHandler(ABC):
         with tempfile.NamedTemporaryFile('w+', delete_on_close=False) as nft_commands:
             print(f"flush set {ipset.family} {ipset.table} {ipset.name}", file=nft_commands)
 
+            print(f"add element {ipset.family} {ipset.table} {ipset.name} {{", file=nft_commands)
             for item in new_items:
-                print(f"add element {ipset.family} {ipset.table} {ipset.name} {{ {item} }}", file=nft_commands)
+                print(f"{item},", file=nft_commands)
+            print("}", file=nft_commands)
 
             nft_commands.close()
             subprocess.check_call(['nft', '-f', nft_commands.name])
@@ -121,21 +123,19 @@ class IPAddressHandler(IPSetHandler):
     def kernel_ipset_type() -> str:
         return "hash:ip"
 
-    @staticmethod
-    def set_type() -> type:
-        return IPAddress
-
 
 class IPNetHandler(IPSetHandler):
     @classmethod
     def preprocess_item_set(cls, new_items):
-        return set(cidr_merge(new_items))
+        merged = set()
+        for cidr in cidr_merge(new_items):
+            if (cidr.version == 4 and cidr.prefixlen == 32) or (cidr.version == 6 and cidr.prefixlen == 128):
+                merged.add(IPAddress(cidr))
+            else:
+                merged.add(cidr)
+        return merged
 
     @staticmethod
     def kernel_ipset_type() -> str:
         return "hash:net"
-
-    @staticmethod
-    def set_type() -> type:
-        return IPNetwork
 

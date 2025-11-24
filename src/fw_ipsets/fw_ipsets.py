@@ -1,7 +1,6 @@
 # SPDX-License-Identifier: BSD-2-Clause
 
 import argparse
-import json
 import logging
 import os
 import subprocess
@@ -49,16 +48,11 @@ def read_config(config_file: str) -> Config:
 def process_ipset(ipset: IPSetDefinition | NFTSetDefinition, temp_suffix: str) -> None:
     logging.info(f"Processing ipset '{ipset.name}'")
 
-    if isinstance(ipset, IPSetDefinition):
-        match ipset.type:
-            case IPSetType.IP:
-                handler = IPAddressHandler
-            case IPSetType.NET:
-                handler = IPNetHandler
-    elif isinstance(ipset, NFTSetDefinition):
-        handler = IPNetHandler
-    else:
-        raise ValueError(f"Unexpected ipset type: {type(ipset)}")
+    match ipset.type:
+        case IPSetType.IP:
+            handler = IPAddressHandler
+        case IPSetType.NET:
+            handler = IPNetHandler
 
     match ipset:
         case IPSetDefinition():
